@@ -1,0 +1,46 @@
+{
+  "init": [
+    {
+      "key": ".prompt",
+      "value": "Please check the following data and tell me what are the bigger dog breads: $data"
+    },
+    {
+      "key": "model",
+      "value": "gemma:7b"
+    },
+    {
+      "key": "showData",
+      "value": "false"
+    },
+    {
+      "key": "showPrompt",
+      "value": "true"
+    }
+  ],
+  "dataSet": {
+    "columns": [
+      {
+        "name": "Bread",
+        "type": "LABEL"
+
+      },
+      {
+        "name": "Weight",
+        "type": "NUMBER"      
+      }
+    ],
+    "data": 
+      [
+        ["Afghan Hound", 35],
+        ["Bulldog", 28],
+        ["Chow Chow", 30],
+        ["Poodle", 20],
+        ["Rottweiler", 45],
+        ["German Shepherd", 40],
+        ["Labrador Retriever", 55],
+        ["Golden Retriever", 65],
+        ["French Bulldog", 16],
+        ["Corgi", 25]    
+    ]
+  }
+}

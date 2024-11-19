@@ -15,22 +15,13 @@
  */
 
 import * as React from "react";
-import * as ReactDOM from "react-dom/client";
+import * as ReactDOM from "react-dom";
 import { LLMPrompterComponent } from "./LLMPrompterComponent";
-import { ComponentApi } from "@kie-tools/dashbuilder-component-api";
 import { ComponentDev } from "@kie-tools/dashbuilder-component-dev";
+import { ComponentApi } from "@kie-tools/dashbuilder-component-api";
 
 const api = new ComponentApi();
 
-const root = ReactDOM.createRoot(
-    document.getElementById('root') as HTMLElement
-);
-root.render(
-    <React.StrictMode>
-        <LLMPrompterComponent controller={api.getComponentController()} />
-    </React.StrictMode>
-);
+ReactDOM.render(<LLMPrompterComponent controller={api.getComponentController()} />, document.getElementById("app")!);
 
-if (process.env.NODE_ENV === "development") {
-    new ComponentDev().start();
-}
+new ComponentDev().start();
