@@ -18,6 +18,7 @@ import * as React from "react";
 import { ComponentController, DataSet } from "@kie-tools/dashbuilder-component-api";
 import { useState, useEffect } from "react";
 import OllamaRequest from "./OllamaRequest";
+import "./LLMPrompterComponent.css";
 import { OllamaResponse } from "./OllamaResponse";
 
 const BASE_URL_PROP = "baseUrl"
@@ -51,9 +52,10 @@ interface ViewData {
 }
 export function LLMPrompterComponent(props: Props) {
   const [viewData, setViewData] = useState<ViewData>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   useEffect(() => {
-    if (!viewData || viewData.llmResponse || viewData.waitDataSet) {
+    if (!viewData || viewData.llmResponse || viewData.waitDataSet || !viewData.shouldRun) {
       return;
     }
     const req = new OllamaRequest(viewData.model, viewData.prompt);
@@ -66,19 +68,29 @@ export function LLMPrompterComponent(props: Props) {
       .then(v => {
         const response: OllamaResponse = JSON.parse(v);
         if (response.error) {
-          console.error("There was an error: " + response.error);
+          const errorMessage = "There was an error: " + response.error;
+          console.error();
           props.controller.requireConfigurationFix(response.error);
-
+          setErrorMessage(errorMessage);
         } else {
           props.controller.configurationOk();
           setViewData({
             ...viewData,
+            waitDataSet: true,
             llmResponse: response.response
           });
+
         }
       })
 
   }, [viewData, props.controller]);
+
+  const runPrompt = React.useCallback(() => {
+    setViewData({
+      ...viewData!,
+      shouldRun: true
+    });
+  }, [viewData])
 
   useEffect(() => {
     props.controller.setOnInit((params: Map<string, any>) => {
@@ -89,11 +101,11 @@ export function LLMPrompterComponent(props: Props) {
       const showData = params.get(SHOW_DATA_PROP) === "true";
       const autoRun = params.get(AUTO_RUN_PROP) === "true";
       if (!prompt) {
-        console.log("Property 'prompt' is missing!");
-        props.controller.requireConfigurationFix("The parameter 'prompt' is required");
+        const errorMessage = "Property 'prompt' is missing!";
+        props.controller.requireConfigurationFix(errorMessage);
+        setErrorMessage(errorMessage);
         return;
       }
-
       if (!serverUrl) {
         console.log("Server URL not provided, using: " + DEFAULT_SERVER_URL);
       } else {
@@ -105,8 +117,6 @@ export function LLMPrompterComponent(props: Props) {
       if (!model) {
         console.log("Model not provided, using: " + DEFAULT_MODEL);
       }
-
-
       props.controller.configurationOk();
       setViewData({
         url: serverUrl || DEFAULT_SERVER_URL,
@@ -120,11 +130,13 @@ export function LLMPrompterComponent(props: Props) {
         shouldRun: autoRun,
         waitDataSet: prompt.indexOf(DATA_PLACEHOLDER) !== -1
       });
-
     });
     props.controller.setOnDataSet((_dataset: DataSet) => {
       if (viewData?.waitDataSet) {
         let dataSetTextContent = "";
+        _dataset.columns.forEach((cl, i) => dataSetTextContent += cl.name + ",");
+        dataSetTextContent = dataSetTextContent.substring(0, dataSetTextContent.length - 1);
+        dataSetTextContent += "\n";
         _dataset.data.forEach((row, i) => {
           row.forEach((r, j) => {
             dataSetTextContent += r + ","
@@ -146,18 +158,28 @@ export function LLMPrompterComponent(props: Props) {
   return (
     <>
 
+      {(errorMessage) ? <label className="error-label" >
+        <span className="error-message">{errorMessage}</span>
+      </label>
+        :
+        <div>
 
-          {viewData?.showPrompt && <p><strong>Prompt:</strong> <br /><em>{viewData?.initialPrompt}</em></p>}
-          {viewData?.showData && <p><strong>Data:</strong> <br /><em>{viewData?.dataSetTextContent}</em></p>}
-          {viewData?.llmResponse && <div>
-            <textarea className="outputTextArea" value={viewData?.llmResponse} disabled>
+          {viewData?.showPrompt && <small><strong>Prompt:</strong> <em>{viewData?.initialPrompt}</em></small>}
+          {viewData?.showData && viewData?.dataSetTextContent && <p><strong><small>Data</small></strong> <br /><textarea style={{ width: "100%" }} disabled>{viewData?.dataSetTextContent}</textarea></p>}
+          {viewData?.llmResponse && <div >
+            <textarea style={{
+              width: "100%",
+              height: "100vh",
+              resize: "none"
+
+            }} value={viewData?.llmResponse} disabled>
             </textarea>
           </div>
           }
-
-          
-        
-      
+          {!viewData?.shouldRun && <button onClick={runPrompt}>&#9658; &#x1F916;</button>}
+          {!viewData?.llmResponse && viewData?.shouldRun && <div className="loader"></div>}
+        </div>
+      }
     </>
   );
 }

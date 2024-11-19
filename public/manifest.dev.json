@@ -1,8 +1,8 @@
 {
   "init": [
     {
-      "key": ".prompt",
-      "value": "Please check the following data and tell me what are the bigger dog breads: $data"
+      "key": "prompt",
+      "value": "Convert the following data to JSON Format: $data"
     },
     {
       "key": "model",
@@ -15,32 +15,34 @@
     {
       "key": "showPrompt",
       "value": "true"
+    },
+    {
+      "key": "showData",
+      "value": "true"
+    },
+    {
+      "key": ".autoRun",
+      "value": "true"
     }
   ],
   "dataSet": {
     "columns": [
       {
-        "name": "Bread",
+        "name": "Name",
         "type": "LABEL"
 
       },
       {
-        "name": "Weight",
+        "name": "Age",
         "type": "NUMBER"      
       }
     ],
     "data": 
       [
-        ["Afghan Hound", 35],
-        ["Bulldog", 28],
-        ["Chow Chow", 30],
-        ["Poodle", 20],
-        ["Rottweiler", 45],
-        ["German Shepherd", 40],
-        ["Labrador Retriever", 55],
-        ["Golden Retriever", 65],
-        ["French Bulldog", 16],
-        ["Corgi", 25]    
+        ["Bill", 36],
+        ["Luanda", 34],
+        ["Anton", 8],
+        ["Honey", 5]
     ]
   }
 }
