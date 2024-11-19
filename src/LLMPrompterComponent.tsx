@@ -74,6 +74,7 @@ export function LLMPrompterComponent(props: Props) {
           setErrorMessage(errorMessage);
         } else {
           props.controller.configurationOk();
+          setErrorMessage(undefined);
           setViewData({
             ...viewData,
             waitDataSet: true,
@@ -106,6 +107,7 @@ export function LLMPrompterComponent(props: Props) {
         setErrorMessage(errorMessage);
         return;
       }
+      setErrorMessage(undefined);
       if (!serverUrl) {
         console.log("Server URL not provided, using: " + DEFAULT_SERVER_URL);
       } else {
