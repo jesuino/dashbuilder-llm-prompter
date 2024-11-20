@@ -2,11 +2,15 @@
   "init": [
     {
       "key": "prompt",
-      "value": "Convert the following data to JSON Format: $data"
+      "value": "Use buttlet points to describe the following data: $data"
     },
     {
       "key": "model",
       "value": "gemma:7b"
+    },
+    {
+      "key": "responseTitle",
+      "value": "DataSet Explanation"
     },
     {
       "key": "showData",
@@ -42,7 +46,10 @@
         ["Bill", 36],
         ["Luanda", 34],
         ["Anton", 8],
-        ["Honey", 6]
+        ["Honey", 6],
+        ["Elisa", 59],
+        ["Edwin", 31],
+        ["Duda", 27]
     ]
   }
 }

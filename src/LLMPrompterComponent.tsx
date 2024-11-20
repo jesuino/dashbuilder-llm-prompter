@@ -20,6 +20,7 @@ import { useState, useEffect } from "react";
 import OllamaRequest from "./OllamaRequest";
 import "./LLMPrompterComponent.css";
 import { OllamaResponse } from "./OllamaResponse";
+import Markdown from "react-markdown";
 
 const BASE_URL_PROP = "baseUrl"
 const PROMPT_PROP = "prompt";
@@ -27,10 +28,13 @@ const MODEL_PROP = "model";
 const SHOW_PROMPT_PROP = "showPrompt";
 const SHOW_DATA_PROP = "showData";
 const AUTO_RUN_PROP = "autoRun";
+const RESPONSE_TITLE_PROP = "responseTitle";
 
 const DEFAULT_SERVER_URL = "http://localhost:11434";
 const DEFAULT_MODEL = "llama3.2";
-const DATA_PLACEHOLDER = "$data"
+const DATA_PLACEHOLDER = "$data";
+const DEFAULT_RESPONSE_TITLE = "LLM Response";
+
 
 // prompt, autoPtompy, cache, 
 
@@ -48,6 +52,7 @@ interface ViewData {
   showData: boolean;
   shouldRunNow: boolean;
   isAutoRun: boolean;
+  responseTitle: string | undefined,
   dataSetTextContent: string | undefined;
   llmResponse: string | undefined;
 }
@@ -102,6 +107,7 @@ export function LLMPrompterComponent(props: Props) {
       const showPrompt = params.get(SHOW_PROMPT_PROP) === "true";
       const showData = params.get(SHOW_DATA_PROP) === "true";
       const autoRun = params.get(AUTO_RUN_PROP) === "true";
+      const responseTitle = params.get(RESPONSE_TITLE_PROP);
       if (!prompt) {
         const errorMessage = "Property 'prompt' is missing!";
         props.controller.requireConfigurationFix(errorMessage);
@@ -125,6 +131,7 @@ export function LLMPrompterComponent(props: Props) {
         url: serverUrl || DEFAULT_SERVER_URL,
         model: model || DEFAULT_MODEL,
         prompt: prompt,
+        responseTitle: responseTitle || DEFAULT_RESPONSE_TITLE,
         initialPrompt: prompt,
         llmResponse: undefined,
         dataSetTextContent: undefined,
@@ -150,13 +157,14 @@ export function LLMPrompterComponent(props: Props) {
           dataSetTextContent = dataSetTextContent.substring(0, dataSetTextContent.length - 1);
           dataSetTextContent += "\n";
         });
-        viewData.dataSetTextContent = dataSetTextContent;
-        viewData.prompt = viewData.prompt.replace(DATA_PLACEHOLDER, dataSetTextContent);
+
         setViewData({
           ...viewData,
           waitDataSet: false,
           llmResponse: undefined,
-          shouldRunNow: viewData.isAutoRun 
+          dataSetTextContent: dataSetTextContent,
+          prompt: viewData.initialPrompt.replace(DATA_PLACEHOLDER, dataSetTextContent),
+          shouldRunNow: viewData.isAutoRun
         });
       }
     });
@@ -169,20 +177,30 @@ export function LLMPrompterComponent(props: Props) {
       </label>
         :
         <div>
-
           {viewData?.showPrompt && <small><strong>Prompt:</strong> <em>{viewData?.initialPrompt}</em></small>}
-          {viewData?.showData && viewData?.dataSetTextContent && <p><strong><small>Data</small></strong> <br /><textarea style={{ width: "100%" }} disabled>{viewData?.dataSetTextContent}</textarea></p>}
-          {viewData?.llmResponse && <div >
-            <textarea style={{
+          {viewData?.showData && viewData?.dataSetTextContent &&
+            <p>
+              <strong><small>Data</small></strong> <br />
+              <textarea className="dataSetContentContainer" value={viewData?.dataSetTextContent} disabled></textarea>
+            </p>
+          }
+          {viewData?.llmResponse &&
+            <div style={{
               width: "100%",
               height: "100vh",
-              resize: "none"
-
-            }} value={viewData?.llmResponse} disabled>
-            </textarea>
-          </div>
+              overflow: "auto"
+            }}>
+              <div className="responseContainer">
+                {viewData?.responseTitle && <h5>{viewData?.responseTitle}</h5>}
+                <Markdown>{viewData?.llmResponse}</Markdown>
+              </div>
+            </div>
           }
-          {!viewData?.shouldRunNow && <button onClick={runPrompt}>&#9658; &#x1F916;</button>}
+          {!viewData?.shouldRunNow &&
+            <div>
+              <button onClick={runPrompt}>&#9658; &#x1F916;</button>
+            </div>
+          }
           {!viewData?.llmResponse && viewData?.shouldRunNow && <div className="loader"></div>}
         </div>
       }
